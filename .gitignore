@@ -1,0 +1,14 @@
+#Extensiones de archivos que no se suben
+*.qpf
+*.qsf
+*.qws
+*.bak
+#Carpetas que no se suben
+output_files/
+incremental_db/
+db/
+#Archivos  o carpetas especificas
+#Estan fuera de la carpeta del proyecto
+#receptor.vhd
+#TX_TRASMITTER.vhd
+#TOP.vhd

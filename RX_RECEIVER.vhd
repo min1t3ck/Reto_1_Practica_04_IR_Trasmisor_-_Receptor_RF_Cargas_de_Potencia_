@@ -1,0 +1,139 @@
+ ----------------------------------------------------------------------------------
+-- Company:
+-- Engineer:
+--
+-- Create Date: 13.03.2026 01:05:51
+-- Design Name:
+-- Module Name: pulseGenerator - Behavioral
+-- Project Name:
+-- Target Devices:
+-- Tool Versions:
+-- Description:
+--
+-- Dependencies:
+--
+-- Revision:
+-- Revision 0.01 - File Created
+-- Additional Comments:
+--
+----------------------------------------------------------------------------------
+
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity RX_RECEIVER is
+    Port ( 	CLK : in STD_LOGIC;
+			RX_IN : in STD_LOGIC;-- ENTRADA (BUS DE DATOS)
+			E : out STD_LOGIC_VECTOR(7 DOWNTO 0)); -- REGISTRO PARA MOSTRAR LOS DATOS
+			  --DEBUGER : out STD_LOGIC;
+			  --DEBUGER2 : out STD_LOGIC); 
+end RX_RECEIVER;
+
+
+architecture Behavioral of RX_RECEIVER is
+------------------------------------------------------
+--			Constantes y Señales por Proceso
+------------------------------------------------------
+CONSTANT  BAUD_RATE : integer:=9600; -- TASA DE TRASMISION DE BITS POR SEGUNDO
+CONSTANT N_CM_BIT_READ : INTEGER:= ((50_000_000+(BAUD_RATE/2))/BAUD_RATE)/2; 
+CONSTANT BIT_START_TIME : integer := 1 * N_CM_BIT_READ;
+CONSTANT BIT_1_TIME : integer := 3 * N_CM_BIT_READ;
+CONSTANT BIT_2_TIME : integer := 5 * N_CM_BIT_READ;
+CONSTANT BIT_3_TIME : integer := 7 * N_CM_BIT_READ;
+CONSTANT BIT_4_TIME : integer := 9 * N_CM_BIT_READ;
+CONSTANT BIT_5_TIME : integer := 11 * N_CM_BIT_READ;
+CONSTANT BIT_6_TIME : integer := 13 * N_CM_BIT_READ;
+CONSTANT BIT_7_TIME : integer := 15 * N_CM_BIT_READ;
+CONSTANT BIT_8_TIME : integer := 17 * N_CM_BIT_READ;
+CONSTANT BIT_STOP_TIME : integer := 19 * N_CM_BIT_READ;
+
+
+SIGNAL RX_IN_NOW : STD_LOGIC := '0';
+SIGNAL RX_IN_BEFORE : STD_LOGIC := '0';
+
+SIGNAL RX_SIGNAL : STD_LOGIC; --LA LOGICA DE ESTE BIT ES INVERSA
+SIGNAL BUSSY_SIGNAL : STD_LOGIC := '0';
+
+SIGNAL CLK_CONT : INTEGER := 0;
+
+SIGNAL E_SIGNAL : STD_LOGIC_VECTOR(7 DOWNTO 0):="00000000";
+
+
+--SIGNAL DEBUGER_SIGNAL : STD_LOGIC := '0';
+--SIGNAL DEBUGER_SIGNAL2 : STD_LOGIC;
+
+begin
+
+RX_RECEIVER : PROCESS(CLK)
+BEGIN
+IF RISING_EDGE(CLK) THEN
+
+	--ACTUALIZAMOS FFP DE RX:
+	RX_IN_BEFORE <= RX_IN_NOW;
+	RX_IN_NOW <= RX_IN;
+	
+	--EVALUAMOS SI SE RECIBIÓ EL PRIMER BIT (START BIT):	
+		IF RX_IN_BEFORE = '1' AND RX_IN_NOW = '0' AND BUSSY_SIGNAL = '0' THEN
+			BUSSY_SIGNAL <= '1'; 			--INDICAMOS QUE EL BUS SE ENCUENTRA OCUPADO
+			CLK_CONT <= 0; --RE-INICIAMOS EL CONTADOR;
+
+		
+	--EVALUAMOS SI SE ENCUENTRA RECIBIENDO DATOS:
+		ELSIF BUSSY_SIGNAL <= '1' THEN
+		--EMPEZAMOS A CONTAR EL NÚMERO DE CICLOS DE RELOJ TRANCURRIDOS:
+		CLK_CONT <= CLK_CONT + 1;
+		--EVALUAMOS EN QUÉ PUNTO DEL TIEMPO NOS ENCONTRAMOS:
+		CASE CLK_CONT IS
+			--RECIBIENDO EL BIT "START". DE 0 A 1*N_CM_BIT_READ:
+			
+			WHEN BIT_1_TIME => --A LA MITAD DE ESTE ENVIO:
+			--CENSA EL BIT 1 EN LA MITAD
+			E_SIGNAL(0) <= RX_SIGNAL;
+			
+			WHEN BIT_2_TIME => --A LA MITAD DE ESTE ENVIO:
+			--CENSA EL BIT 2 EN LA MITAD
+			E_SIGNAL(1) <= RX_SIGNAL;
+			
+			WHEN BIT_3_TIME => --A LA MITAD DE ESTE ENVIO:
+			--CENSA EL BIT 3 EN LA MITAD
+			E_SIGNAL(2) <= RX_SIGNAL;
+			
+			WHEN BIT_4_TIME => --A LA MITAD DE ESTE ENVIO:
+			--CENSA EL BIT 4 EN LA MITAD
+			E_SIGNAL(3) <= RX_SIGNAL;
+			
+			WHEN BIT_5_TIME => --A LA MITAD DE ESTE ENVIO:
+			--CENSA EL BIT 5 EN LA MITAD
+			E_SIGNAL(4) <= RX_SIGNAL;
+			
+			WHEN BIT_6_TIME => --A LA MITAD DE ESTE ENVIO:
+			--CENSA EL BIT 6 EN LA MITAD
+			E_SIGNAL(5) <= RX_SIGNAL;
+			
+			WHEN BIT_7_TIME => --A LA MITAD DE ESTE ENVIO:
+			--CENSA EL BIT 7 EN LA MITAD
+			E_SIGNAL(6) <= RX_SIGNAL;
+			
+			WHEN BIT_8_TIME => --A LA MITAD DE ESTE ENVIO:
+			--CENSA EL BIT 8 EN LA MITAD
+			E_SIGNAL(7) <= RX_SIGNAL;
+			
+			WHEN BIT_STOP_TIME =>
+			--INDICAMOS QUE EL BUS SE ENCUENTRA DESOCUPADO:
+			BUSSY_SIGNAL <= '0';
+			--DEBUGER_SIGNAL <= NOT(DEBUGER_SIGNAL);
+			
+			WHEN OTHERS =>
+				NULL;
+			END CASE;
+	END IF;
+END IF;
+	
+END PROCESS;
+-- ASIGNACIONES DIRECTAS ASOCIADAS:
+RX_SIGNAL <= RX_IN;
+E <= E_SIGNAL;
+
+
+end Behavioral;
